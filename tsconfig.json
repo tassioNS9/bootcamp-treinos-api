@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig" /* Autocomplete no VSCode, Validação automática das propriedades, Sugestões de configuração*/,
+  "compilerOptions": {
+    // Contém as configurações principais do compilador TypeScript.
+    "module": "nodenext", // Suporte moderno ao Node.js , Compatível com ESM (.mjs / import/export) e CommonJS
+    "moduleResolution": "nodenext", //Define como o TypeScript resolve os imports.
+    "target": "es2024", //Mantém recursos modernos, Menos transpile → código mais limpo
+    "skipLibCheck": true, //Ignora verificação de tipos dentro dos arquivos .d.ts das bibliotecas. Compilação mais rápida, Evita erros vindos de libs externa
+    "strict": true, //Isso deixa o código muito mais seguro.
+    "outDir": "./dist" //Define a pasta de saída do código compilado.
+  },
+  "include": ["src"] //Define quais arquivos serão compilados
+}
