@@ -5,6 +5,7 @@ import { openAPI } from "better-auth/plugins";
 import { prisma } from "./db.js";
 
 export const auth = betterAuth({
+  // Permitir que o frontend acesse os cookies de autenticação
   trustedOrigins: ["http://localhost:3000"],
   emailAndPassword: {
     enabled: true,
