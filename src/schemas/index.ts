@@ -80,3 +80,23 @@ export const HomeDataResponseSchema = z.object({
     }),
   ),
 });
+
+export const GetWorkoutPlanParamsSchema = z.object({
+  workoutPlanId: z.uuid(),
+});
+
+export const GetWorkoutPlanResponseSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  workoutDays: z.array(
+    z.object({
+      id: z.uuid(),
+      weekDay: z.enum(WeekDay),
+      name: z.string(),
+      isRest: z.boolean(),
+      coverImageUrl: z.url().optional(),
+      estimatedDurationInSeconds: z.number(),
+      exercisesCount: z.number().int().nonnegative(),
+    }),
+  ),
+});
