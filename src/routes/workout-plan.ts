@@ -1,0 +1,144 @@
+import { fromNodeHeaders } from "better-auth/node";
+import { FastifyInstance } from "fastify";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
+
+import {
+  NotFoundError,
+  WorkoutPlanNotActiveError,
+  WorkoutSessionAlreadyStartedError,
+} from "../errors/index.js";
+import { auth } from "../lib/auth.js";
+import {
+  ErrorSchema,
+  StartWorkoutSessionParamsSchema,
+  StartWorkoutSessionResponseSchema,
+  WorkoutPlanSchema,
+} from "../schemas/index.js";
+import { CreateWorkoutPlan } from "../usecases/CreateWorkoutPlan.js";
+import { StartWorkoutSession } from "../usecases/StartWorkoutSession.js";
+
+export const workoutPlanRoutes = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: "POST",
+    url: "/",
+    schema: {
+      tags: ["Workout Plan"],
+      summary: "Create a workout plan",
+      body: WorkoutPlanSchema.omit({ id: true }),
+      response: {
+        201: WorkoutPlanSchema,
+        400: ErrorSchema,
+        401: ErrorSchema,
+        404: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      try {
+        const session = await auth.api.getSession({
+          headers: fromNodeHeaders(request.headers),
+        });
+        if (!session) {
+          return reply.status(401).send({
+            error: "Unauthorized",
+            code: "UNAUTHORIZED",
+          });
+        }
+        const createWorkoutPlan = new CreateWorkoutPlan();
+        const result = await createWorkoutPlan.execute({
+          userId: session.user.id,
+          name: request.body.name,
+          workoutDays: request.body.workoutDays,
+        });
+        return reply.status(201).send(result);
+      } catch (error) {
+        app.log.error(error);
+        if (error instanceof NotFoundError) {
+          request.log.error(error);
+          return reply.status(404).send({
+            error: "Not Found",
+            code: "NOT_FOUND",
+          });
+        }
+        request.log.error(error);
+        return reply.status(500).send({
+          error: "Internal Server Error",
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    },
+  });
+
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: "POST",
+    url: "/:workoutPlanId/days/:workoutDayId/sessions",
+    schema: {
+      tags: ["Workout Plan"],
+      summary: "Start a workout session for a workout day",
+      params: StartWorkoutSessionParamsSchema,
+      response: {
+        201: StartWorkoutSessionResponseSchema,
+        400: ErrorSchema,
+        401: ErrorSchema,
+        404: ErrorSchema,
+        409: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      try {
+        const session = await auth.api.getSession({
+          headers: fromNodeHeaders(request.headers),
+        });
+
+        if (!session) {
+          return reply.status(401).send({
+            error: "Unauthorized",
+            code: "UNAUTHORIZED",
+          });
+        }
+
+        const startWorkoutSession = new StartWorkoutSession();
+        const result = await startWorkoutSession.execute({
+          userId: session.user.id,
+          workoutPlanId: request.params.workoutPlanId,
+          workoutDayId: request.params.workoutDayId,
+        });
+
+        return reply.status(201).send(result);
+      } catch (error) {
+        app.log.error(error);
+
+        if (error instanceof NotFoundError) {
+          request.log.error(error);
+          return reply.status(404).send({
+            error: "Not Found",
+            code: "NOT_FOUND",
+          });
+        }
+
+        if (error instanceof WorkoutPlanNotActiveError) {
+          request.log.error(error);
+          return reply.status(400).send({
+            error: "Workout plan is not active",
+            code: "WORKOUT_PLAN_NOT_ACTIVE",
+          });
+        }
+
+        if (error instanceof WorkoutSessionAlreadyStartedError) {
+          request.log.error(error);
+          return reply.status(409).send({
+            error: "Workout session already started for this day",
+            code: "WORKOUT_SESSION_ALREADY_STARTED",
+          });
+        }
+
+        request.log.error(error);
+        return reply.status(500).send({
+          error: "Internal Server Error",
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    },
+  });
+};

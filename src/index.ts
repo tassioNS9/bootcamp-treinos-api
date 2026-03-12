@@ -13,7 +13,7 @@ import {
 import z from "zod";
 
 import { auth } from "./lib/auth.js";
-import { workoutPlanRoutes } from "./routes/index.js";
+import { workoutPlanRoutes } from "./routes/workout-plan.js";
 
 const app = Fastify({
   logger: true,
