@@ -7,6 +7,22 @@ export const ErrorSchema = z.object({
   code: z.string(),
 });
 
+export const UserTrainDataSchema = z.object({
+  userId: z.uuid(),
+  userName: z.string(),
+  weightInGrams: z.number(),
+  heightInCentimeters: z.number(),
+  age: z.number(),
+  bodyFatPercentage: z.number(), // 1 representa 100%
+});
+
+export const UpsertUserTrainDataBodySchema = z.object({
+  weightInGrams: z.number().int().positive(),
+  heightInCentimeters: z.number().int().positive(),
+  age: z.number().int().positive(),
+  bodyFatPercentage: z.number().min(0).max(1),
+});
+
 export const WorkoutPlanSchema = z.object({
   id: z.uuid(),
   name: z.string().trim().min(1),
@@ -114,6 +130,14 @@ export const ListWorkoutPlansSchema = z.array(
   }),
 );
 
+export const UpsertUserTrainDataSchema = z.object({
+  userId: z.string(),
+  weightInGrams: z.number(),
+  heightInCentimeters: z.number(),
+  age: z.number(),
+  bodyFatPercentage: z.number(),
+});
+
 export const HomeParamsSchema = z.object({
   date: z.iso.date(),
 });
@@ -139,6 +163,8 @@ export const HomeDataResponseSchema = z.object({
     }),
   ),
 });
+
+export const MeResponseSchema = UserTrainDataSchema.nullable();
 
 export const GetWorkoutPlanParamsSchema = z.object({
   workoutPlanId: z.uuid(),
