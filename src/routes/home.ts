@@ -16,6 +16,7 @@ export const homeRoutes = async (app: FastifyInstance) => {
     method: "GET",
     url: "/:date",
     schema: {
+      operationId: "getHomeData",
       tags: ["Home"],
       summary: "Get home page data",
       params: HomeParamsSchema,
@@ -52,7 +53,7 @@ export const homeRoutes = async (app: FastifyInstance) => {
         if (error instanceof NotFoundError) {
           request.log.error(error);
           return reply.status(404).send({
-            error: "Not Found",
+            error: error.message,
             code: "NOT_FOUND",
           });
         }
