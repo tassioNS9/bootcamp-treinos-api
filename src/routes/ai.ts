@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import {
   convertToModelMessages,
   stepCountIs,
@@ -94,10 +94,10 @@ export const aiRoutes = async (app: FastifyInstance) => {
       const { messages } = request.body as { messages: UIMessage[] };
 
       const result = streamText({
-        model: openai("gpt-4o-mini"),
+        model: google("gemini-2.5-flash"),
         system: SYSTEM_PROMPT,
         messages: await convertToModelMessages(messages),
-        stopWhen: stepCountIs(5),
+        stopWhen: stepCountIs(10),
         // Definir as ferramentas disponíveis para a IA, incluindo as operações de treino e plano de treino
         tools: {
           getWorkoutPlans: tool({

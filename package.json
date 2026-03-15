@@ -17,6 +17,7 @@
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-simple-import-sort": "12.1.1",
+    "@ai-sdk/google": "^3.0.34",
     "globals": "^17.3.0",
     "prettier": "3.8.1",
     "prisma": "^7.4.0",
